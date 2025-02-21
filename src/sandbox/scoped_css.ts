@@ -513,13 +513,8 @@ export default function scopedCSS (
     const escapeRegExp = (regStr: string) => regStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
     if (styleElement.textContent) {
-      commonAction(
-        styleElement,
-        app.name,
-        prefix,
-        app.url,
-        linkPath,
-      )
+      commonAction(styleElement, app.name, prefix, app.url, linkPath)
+
       const observer = new MutationObserver(() => {
         const escapedPrefix = escapeRegExp(prefix)
         const isPrefixed = styleElement.textContent && new RegExp(escapedPrefix).test(styleElement.textContent)
