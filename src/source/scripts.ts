@@ -531,9 +531,16 @@ export function runScript (
       runParsedFunction(app, scriptInfo)
     }
   } catch (e) {
-    console.error(`[micro-app from ${replaceElement ? 'runDynamicScript' : 'runScript'}] app ${app.name}: `, e, address)
+    console.warn(`[micro-app from ${replaceElement ? 'runDynamicScript' : 'runScript'}] app ${app.name}: `, e, address)
     // throw error in with sandbox to parent app
-    throw e
+    const error = e as Error
+    let throwError = true
+    if (typeof microApp?.options?.excludeRunScriptFilter === 'function') {
+      throwError = microApp.options.excludeRunScriptFilter(address, error, app.name, app.url) !== true
+    }
+    if (throwError) {
+      throw e
+    }
   }
 }
 
