@@ -306,7 +306,7 @@ function patchDocumentProperty (
       get: () => {
         throttleDeferForIframeAppName(appName)
         if (tagName === 'body') {
-          return sandbox.options.container?.querySelector('micro-app-body')
+          return sandbox.options.container?.querySelector('micro-app-body') || rawDocument[tagName]
         }
         return rawDocument[tagName]
       },

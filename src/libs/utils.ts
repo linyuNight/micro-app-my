@@ -144,6 +144,9 @@ export function isVideoElement(target: unknown): target is HTMLVideoElement {
 export function isLinkElement(target: unknown): target is HTMLLinkElement {
   return toTypeString(target) === '[object HTMLLinkElement]'
 }
+export function isBodyElement(target: unknown): target is HTMLBodyElement {
+  return toTypeString(target) === '[object HTMLBodyElement]'
+}
 
 export function isStyleElement(target: unknown): target is HTMLStyleElement {
   return toTypeString(target) === '[object HTMLStyleElement]'

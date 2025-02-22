@@ -4,10 +4,7 @@ import {
   CompletionPath,
   injectFiberTask,
   serialExecFiberTasks,
-  isLinkElement,
-  isScriptElement,
-  isStyleElement,
-  isImageElement,
+  isBodyElement,
 } from '../libs/utils'
 import {
   extractLinkFromHtml,
@@ -24,54 +21,56 @@ import globalEnv from '../libs/global_env'
 
 /**
  * Recursively process each child element
- * @param parent parent element
+ * @param body body element
  * @param app app
  * @param microAppHead micro-app-head element
  */
-function flatChildren (
-  parent: HTMLElement,
+function flatBodyChildren(
+  body: HTMLElement,
   app: AppInterface,
-  microAppHead: Element,
   fiberStyleTasks: fiberTasks,
 ): void {
-  const children = Array.from(parent.children)
+  if (!body || !isBodyElement(body)) {
+    return
+  }
+  const links = Array.from(body.getElementsByTagName('link'))
 
-  children.length && children.forEach((child) => {
-    flatChildren(child as HTMLElement, app, microAppHead, fiberStyleTasks)
+  links.map((dom) => {
+    if (dom.hasAttribute('exclude') || checkExcludeUrl(dom.getAttribute('href'), app.name)) {
+      dom.parentElement!.replaceChild(document.createComment('link element with exclude attribute ignored by micro-app'), dom)
+    } else if (!(dom.hasAttribute('ignore') || checkIgnoreUrl(dom.getAttribute('href'), app.name))) {
+      extractLinkFromHtml(dom, dom.parentElement, app)
+    } else if (dom.hasAttribute('href')) {
+      globalEnv.rawSetAttribute.call(dom, 'href', CompletionPath(dom.getAttribute('href')!, app.url))
+    }
+    return dom
   })
 
-  for (const dom of children) {
-    if (isLinkElement(dom)) {
-      if (dom.hasAttribute('exclude') || checkExcludeUrl(dom.getAttribute('href'), app.name)) {
-        parent.replaceChild(document.createComment('link element with exclude attribute ignored by micro-app'), dom)
-      } else if (!(dom.hasAttribute('ignore') || checkIgnoreUrl(dom.getAttribute('href'), app.name))) {
-        extractLinkFromHtml(dom, parent, app)
-      } else if (dom.hasAttribute('href')) {
-        globalEnv.rawSetAttribute.call(dom, 'href', CompletionPath(dom.getAttribute('href')!, app.url))
-      }
-    } else if (isStyleElement(dom)) {
-      if (dom.hasAttribute('exclude')) {
-        parent.replaceChild(document.createComment('style element with exclude attribute ignored by micro-app'), dom)
-      } else if (app.scopecss && !dom.hasAttribute('ignore')) {
-        injectFiberTask(fiberStyleTasks, () => scopedCSS(dom, app))
-      }
-    } else if (isScriptElement(dom)) {
-      extractScriptElement(dom, parent, app)
-    } else if (isImageElement(dom) && dom.hasAttribute('src')) {
+  const styles = Array.from(body.getElementsByTagName('style'))
+
+  styles.map((dom) => {
+    if (dom.hasAttribute('exclude')) {
+      dom.parentElement!.replaceChild(document.createComment('style element with exclude attribute ignored by micro-app'), dom)
+    } else if (app.scopecss && !dom.hasAttribute('ignore')) {
+      injectFiberTask(fiberStyleTasks, () => scopedCSS(dom, app))
+    }
+    return dom
+  })
+
+  const scripts = Array.from(body.getElementsByTagName('script'))
+
+  scripts.map((dom) => {
+    extractScriptElement(dom, dom.parentElement, app)
+    return dom
+  })
+  const images = Array.from(body.getElementsByTagName('img'))
+
+  images.map((dom) => {
+    if (dom.hasAttribute('src')) {
       globalEnv.rawSetAttribute.call(dom, 'src', CompletionPath(dom.getAttribute('src')!, app.url))
     }
-    /**
-     * Don't remove meta and title, they have some special scenes
-     * e.g.
-     * document.querySelector('meta[name="viewport"]') // for flexible
-     * document.querySelector('meta[name="baseurl"]').baseurl // for api request
-     *
-     * Title point to main app title, child app title used to be compatible with some special scenes
-     */
-    // else if (dom instanceof HTMLMetaElement || dom instanceof HTMLTitleElement) {
-    //   parent.removeChild(dom)
-    // }
-  }
+    return dom
+  })
 }
 
 /**
@@ -79,7 +78,7 @@ function flatChildren (
  * @param htmlStr html string
  * @param app app
  */
-export function extractSourceDom (htmlStr: string, app: AppInterface): void {
+export function extractSourceDom(htmlStr: string, app: AppInterface): void {
   const wrapElement = app.parseHtmlString(htmlStr)
   const microAppHead = globalEnv.rawElementQuerySelector.call(wrapElement, 'micro-app-head')
   const microAppBody = globalEnv.rawElementQuerySelector.call(wrapElement, 'micro-app-body')
@@ -92,7 +91,7 @@ export function extractSourceDom (htmlStr: string, app: AppInterface): void {
 
   const fiberStyleTasks: fiberTasks = app.isPrefetch || app.fiber ? [] : null
 
-  flatChildren(wrapElement, app, microAppHead, fiberStyleTasks)
+  flatBodyChildren(wrapElement, app, fiberStyleTasks)
 
   /**
    * Style and link are parallel, as it takes a lot of time for link to request resources. During this period, style processing can be performed to improve efficiency.
