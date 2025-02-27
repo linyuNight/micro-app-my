@@ -368,6 +368,7 @@ declare module '@micro-app/types' {
     includeCrossOrigin?: (assetUrl: string) => boolean
     getRootElementParentNode?: (node: Node, appName: AppName) => void
     customProxyDocumentProps?: Map<string | number | symbol, (value: unknown) => void>
+    inheritBaseBody?:boolean
   }
 
   // MicroApp config

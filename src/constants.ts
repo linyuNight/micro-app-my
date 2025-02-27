@@ -110,6 +110,7 @@ const BASE_SCOPE_WINDOW_EVENT = [
   'appstate-change',
   'statechange',
   'mounted',
+  'error'
   // 'beforeunload', // remove at 2024.5.30 by cangdu
 ]
 
