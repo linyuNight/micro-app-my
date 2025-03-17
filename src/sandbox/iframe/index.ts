@@ -101,6 +101,8 @@ export default class IframeSandbox {
     this.microAppWindow = this.iframe!.contentWindow
 
     this.patchIframe(this.microAppWindow, (resolve: CallableFunction) => {
+      // refresh
+      this.microAppWindow = this.iframe!.contentWindow
       // create new html to iframe
       this.createIframeTemplate(this.microAppWindow)
       // get escapeProperties from plugins

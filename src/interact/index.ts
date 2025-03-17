@@ -183,6 +183,15 @@ export class EventCenterForBaseApp extends EventCenterForGlobal {
   clearDataListener (appName: string): void {
     eventCenter.off(createEventName(formatAppName(appName), false))
   }
+
+  changeEventAppName (newAppName: string, oldAppName: string): void {
+    const newEventName = createEventName(formatAppName(newAppName), true)
+    const oldEventName = createEventName(formatAppName(oldAppName), true)
+    if (eventCenter.eventList.has(oldEventName)) {
+      eventCenter.eventList.set(newEventName, eventCenter.eventList.get(oldEventName))
+      eventCenter.eventList.delete(oldEventName)
+    }
+  }
 }
 
 // Event center for sub app

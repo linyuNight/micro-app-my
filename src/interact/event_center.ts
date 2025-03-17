@@ -1,14 +1,15 @@
 /* eslint-disable no-cond-assign */
 import { CallableFunctionForInteract, AppName } from '@micro-app/types'
 import { logError, isFunction, isPlainObject, assign, defer } from '../libs/utils'
+interface IEventInfo {
+  data: Record<PropertyKey, unknown>
+  tempData?: Record<PropertyKey, unknown> | null
+  force?: boolean
+  callbacks: Set<CallableFunctionForInteract>
+}
 
 export default class EventCenter {
-  public eventList = new Map<string, {
-    data: Record<PropertyKey, unknown>,
-    tempData?: Record<PropertyKey, unknown> | null,
-    force?: boolean,
-    callbacks: Set<CallableFunctionForInteract>,
-  }>()
+  public eventList = new Map<string, IEventInfo | undefined>()
 
   // whether the name is legal
   private isLegalName (name: string): boolean {

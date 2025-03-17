@@ -51,7 +51,7 @@ export function defineElement (tagName: string): void {
     private cacheData: Record<PropertyKey, unknown> | null = null
     private connectedCount = 0
     private connectStateMap: Map<number, boolean> = new Map()
-    public appName = '' // app name
+    private _appName = '' // app name
     public appUrl = '' // app url
     public ssrUrl = '' // html path in ssr mode
     public version = version
@@ -441,6 +441,7 @@ export function defineElement (tagName: string): void {
           unmountcb,
         })
       }
+      delete this.__MICRO_APP_NAME__
     }
 
     // hidden app when disconnectedCallback called with keep-alive
@@ -632,6 +633,17 @@ export function defineElement (tagName: string): void {
         return this.cacheData
       }
       return null
+    }
+
+    set appName(value: string) {
+      if (value !== this._appName) {
+        microApp.changeEventAppName(value, this._appName)
+        this._appName = value
+      }
+    }
+
+    get appName(): string {
+      return this._appName
     }
 
     /**

@@ -240,10 +240,9 @@ export default class CreateApp implements AppInterface {
 
     this.createSandbox()
 
-    // place outside of nextAction, as nextAction may execute async
-    this.setAppState(appStates.BEFORE_MOUNT)
-
     const nextAction = () => {
+      // place inside of nextAction, make sure iframe ready
+      this.setAppState(appStates.BEFORE_MOUNT)
       /**
        * Special scenes:
        * 1. mount before prerender exec mount (loading source)
