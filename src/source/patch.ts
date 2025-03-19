@@ -317,7 +317,15 @@ function completePathDynamic(app: AppInterface, newChild: Node): void {
           // If it is the anchor tag,eg. <a href="#xxx"/>, the path will not be completed
           (/^(a)$/i.test(newChild.tagName) && newChild.hasAttribute('href') && !/^#/.test(newChild.getAttribute('href') || ''))
     ) {
-      globalEnv.rawSetAttribute.call(newChild, 'href', CompletionPath(newChild.getAttribute('href')!, app.url))
+      const aHrefResolver = microApp?.options?.aHrefResolver
+      const hrefValue = newChild.getAttribute('href')!
+      let nextHrefValue
+      if ((/^(a)$/i.test(newChild.tagName) && typeof aHrefResolver === 'function')) {
+        nextHrefValue = aHrefResolver(hrefValue, app.name, app.url)
+      } else {
+        nextHrefValue = CompletionPath(hrefValue, app.url)
+      }
+      globalEnv.rawSetAttribute.call(newChild, 'href', nextHrefValue)
     }
   }
 }
@@ -560,7 +568,12 @@ export function patchElementAndDocument(): void {
 
       ) {
         const app = appInstanceMap.get(appName)
-        value = CompletionPath(value, app!.url)
+        const aHrefResolver = microApp?.options?.aHrefResolver
+        if (key === 'href' && /^a$/i.test(this.tagName) && typeof aHrefResolver === 'function') {
+          value = aHrefResolver(value, appName, app!.url)
+        } else {
+          value = CompletionPath(value, app!.url)
+        }
       }
       globalEnv.rawSetAttribute.call(this, key, value)
       if (isImageElement(this) || isVideoElement(this) || isAudioElement(this)) {

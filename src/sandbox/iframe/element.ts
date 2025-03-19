@@ -13,7 +13,6 @@ import {
   isDocumentFragment,
   isFunction,
   isBrowser,
-  isArray,
 } from '../../libs/utils'
 import {
   updateElementInfo,
@@ -242,11 +241,7 @@ function patchIframeAttribute (url: string, microAppWindow: microAppWindowType, 
     ) {
       this.setAttribute(key, value)
     } else {
-      let appPlugins = microApp?.options?.plugins?.modules?.[appName]
-      if (!isArray(appPlugins)) {
-        appPlugins = []
-      }
-      const aHrefResolver = appPlugins[0]?.aHrefResolver
+      const aHrefResolver = microApp?.options?.aHrefResolver
       if (key === 'href' && /^a$/i.test(this.tagName) && typeof aHrefResolver === 'function') {
         // 试验性质：a 标签开放自定义补齐功能
         value = aHrefResolver(value, appName, url)
