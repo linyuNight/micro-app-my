@@ -13,6 +13,8 @@ const isPro = process.env.NODE_ENV === 'production'
 fse.emptyDirSync(path.join(cwd, 'lib'))
 fse.emptyDirSync(path.join(cwd, 'polyfill'))
 
+console.log('测试123')
+
 function getCommonPlugins (isBundlerESMBuild) {
   // 通用插件
   return [
