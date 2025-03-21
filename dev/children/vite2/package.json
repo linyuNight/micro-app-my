@@ -22,5 +22,6 @@
     "unplugin-element-plus": "^0.7.0",
     "unplugin-vue-components": "^0.24.1",
     "vite": "^2.6.13"
-  }
+  },
+  "license": "MIT"
 }
